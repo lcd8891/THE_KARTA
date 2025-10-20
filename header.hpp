@@ -211,11 +211,16 @@ struct Кнопка{
             if(исключение_потока)std::rethrow_exception(исключение_потока);
             sf::Event event;
             while(window.pollEvent(event)){
-                ещё_указатель(event);
                 if(event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)просчёт_клика({event.mouseButton.x,event.mouseButton.y});
                 if(event.type==sf::Event::MouseWheelScrolled){
                     колёсико=event.mouseWheelScroll.delta;
                 }
+                if(event.type == sf::Event::KeyPressed){
+                    if(event.key.control && event.key.code==sf::Keyboard::Q){
+                        window.close();
+                    }
+                }
+                ещё_указатель(event);
             }
             указатель();
             #ifdef ОТРИСОВЫВАЙ_КНОПКИ
