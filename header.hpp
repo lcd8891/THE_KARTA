@@ -79,6 +79,7 @@ struct Кнопка{
         обосратся ошибочка(L"Крутой хит "+TO_WSTRING(_да)+L" небудет :(");
     }
     музыка.setLoop(true);
+    музыка.setVolume(50);
     музыка.play();  
 }
 ничего добавить_кнопку(std::string id,sf::Vector2f _pos,sf::Vector2f _size){
