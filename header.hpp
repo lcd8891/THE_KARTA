@@ -2,7 +2,7 @@
 
 #define ВСЁ_КРУТО 0
 #define TO_WSTRING(STR) std::wstring(STR.begin(),STR.end())
-#define ОТРИСОВЫВАЙ_КНОПКИ
+// #define ОТРИСОВЫВАЙ_КНОПКИ
 #define область_определения(ЗНАЧ,МИН,МАКС) ЗНАЧ >= МИН && ЗНАЧ <= МАКС
 
 #include <SFML/Graphics.hpp>
@@ -12,6 +12,7 @@
 #include <future>
 #include <thread>
 #include <map>
+#include <random>
 #include "other_stuffs.hpp"
 #include "drawing.hpp"
 #include "translate.hpp"
@@ -55,6 +56,11 @@ std::map<std::string,Кнопка> кнопки;
 да_нет кнопка_жать = false;
 символ колёсико = 0;
 Карта зе_карта;
+строка музыки[] = {
+    "map",
+    "map2"
+};
+unsigned число_загаданное_небесами;
 
 struct Кнопка{
     sf::Vector2f позиция;
@@ -62,6 +68,12 @@ struct Кнопка{
     символ статус;
 };
 
+ничего включить_звук(unsigned ци){
+    буффер_звуков[последний_ид].setBuffer(звуки[ци]);
+    буффер_звуков[последний_ид].play();
+    последний_ид++;
+    if(последний_ид>9)последний_ид=0;
+}
 ничего включить_хит(std::string _да){
     if(!музыка.openFromFile("./res/music/"+_да+".mp3")){
         обосратся ошибочка(L"Крутой хит "+TO_WSTRING(_да)+L" небудет :(");
@@ -171,6 +183,10 @@ struct Кнопка{
 ничего начать_cycles(){
     std::exception_ptr исключение_потока = nullptr;
     try{
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<unsigned> dist(0, 1);
+        число_загаданное_небесами = dist(gen);
         загрузить_шрифт();
         поток = new std::thread([&исключение_потока](){
             try{

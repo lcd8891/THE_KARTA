@@ -24,7 +24,7 @@ sf::RectangleShape парралелепипед;
 
 ничего пишем(стринги _строка, sf::Vector2f _позиция,символ _угол = 0 ,sf::Color _цвет = sf::Color::White, цифорка _размер = 32){
     красивый_текст.setOutlineThickness(2);
-    красивый_текст.setOutlineColor({0,0,0});
+    красивый_текст.setOutlineColor({0,0,0,_цвет.a});
     красивый_текст.setString(_строка);
     красивый_текст.setCharacterSize(_размер);
     sf::FloatRect r  = красивый_текст.getGlobalBounds();
@@ -64,7 +64,7 @@ sf::RectangleShape парралелепипед;
     некрасивый_текст.setFillColor(sf::Color::White);
     window.draw(некрасивый_текст);
 }
-ничего спрайт(unsigned _ид, sf::Vector2f _позиция, да_нет _центрировать = false){
+ничего спрайт(unsigned _ид, sf::Vector2f _позиция, да_нет _центрировать = false,sf::Color цвет = sf::Color::White){
     spr.setTexture(текстуры[_ид],true);
     if(_центрировать){
         sf::Vector2f size = {текстуры[_ид].getSize().x / 2.f, текстуры[_ид].getSize().y / 2.f};
@@ -72,8 +72,29 @@ sf::RectangleShape парралелепипед;
     }else{
         spr.setOrigin({0,0});
     }
+    spr.setColor(цвет);
     spr.setPosition(_позиция);
     window.draw(spr);
+}
+ничего спрайт(sf::Texture &текстура, sf::Vector2f _позиция,sf::Color цвет = sf::Color::White, да_нет _центрировать = false){
+    spr.setTexture(текстура,true);
+    if(_центрировать){
+        sf::Vector2f size = {текстура.getSize().x / 2.f, текстура.getSize().y / 2.f};
+        spr.setOrigin(size);
+    }else{
+        spr.setOrigin({0,0});
+    }
+    spr.setColor(цвет);
+    spr.setPosition(_позиция);
+    window.draw(spr);
+}
+ничего прикольная_линия(sf::Vector2f с, sf::Vector2f по, sf::Color цвет_с,sf::Color цвет_по){
+    sf::VertexArray line(sf::LineStrip, 2);
+    line[0].position = с;
+    line[0].color = цвет_с;
+    line[1].position = по;
+    line[1].color = цвет_по;
+    window.draw(line);
 }
 ничего квадрат_из_линий( sf::Vector2f _позиция,sf::Vector2f _размер,sf::Color _цвет = sf::Color::White){
     парралелепипед.setFillColor({0,0,0,0});
