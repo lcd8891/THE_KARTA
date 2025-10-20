@@ -1,0 +1,195 @@
+#pragma once
+
+#define ВСЁ_КРУТО 0
+#define TO_WSTRING(STR) std::wstring(STR.begin(),STR.end())
+#define ОТРИСОВЫВАЙ_КНОПКИ
+#define область_определения(ЗНАЧ,МИН,МАКС) ЗНАЧ >= МИН && ЗНАЧ <= МАКС
+
+#include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
+#include <stdexcept>
+#include <sstream>
+#include <future>
+#include <thread>
+#include <map>
+#include "other_stuffs.hpp"
+#include "drawing.hpp"
+#include "translate.hpp"
+#include "karta.hpp"
+
+struct Кнопка;
+
+sf::RenderWindow window;
+void (*указатель)();
+void (*ещё_указатель)(const sf::Event &event);
+void (*меню_указатель)();
+sf::Music музыка;
+sf::Sound буффер_звуков[10];
+unsigned последний_ид = 0;
+float процент;
+std::thread *поток;
+std::map<std::string,Кнопка> кнопки;
+да_нет кнопка_жать = false;
+символ колёсико = 0;
+Карта зе_карта;
+
+struct Кнопка{
+    sf::Vector2f позиция;
+    sf::Vector2f размер;
+    символ статус;
+};
+
+ничего включить_хит(std::string _да){
+    if(!музыка.openFromFile("./res/music/"+_да+".mp3")){
+        обосратся ошибочка(L"Крутой хит "+TO_WSTRING(_да)+L" небудет :(");
+    }
+    музыка.setLoop(true);
+    музыка.play();  
+}
+ничего добавить_кнопку(std::string id,sf::Vector2f _pos,sf::Vector2f _size){
+    кнопки[id] = {_pos,_size,0};
+}
+ничего забыть_кнопки(){
+    кнопки.clear();
+    кнопка_жать = false;
+}
+да_нет кнопка_нажата(std::string id){
+    return кнопки[id].статус == 2;
+}
+строка какая_кнопка_нажата(){
+    for(auto &итератор_кнопки : кнопки){
+        Кнопка &кнопка = итератор_кнопки.second;
+        if(кнопка.статус == 2){
+            return итератор_кнопки.first;
+        }
+    }
+    return строка();
+}
+ничего просчёт_клика(sf::Vector2i позиция){
+    if(кнопка_жать)return;
+    for(auto &итератор_кнопки : кнопки){
+        Кнопка &кнопка = итератор_кнопки.second;
+        if(область_определения(позиция.x, кнопка.позиция.x - (кнопка.размер.x / 2), кнопка.позиция.x + (кнопка.размер.x / 2)) && область_определения(позиция.y, кнопка.позиция.y - (кнопка.размер.y / 2), кнопка.позиция.y + (кнопка.размер.y / 2))){
+            if(кнопка.статус == 1){
+                кнопка.статус = 2;
+                кнопка_жать = true;
+            }
+        }
+    }
+}
+ничего просчёт_кнопок(){
+    да_нет ставим_курсор = false;
+    sf::Vector2i pos = sf::Mouse::getPosition(window);
+    if(!кнопка_жать){
+        for(auto &итератор_кнопки : кнопки){
+        Кнопка &кнопка = итератор_кнопки.second;
+            if(кнопка.статус == 2){
+                кнопка.статус = 0;
+            }
+        }
+    }
+    for(auto &итератор_кнопки : кнопки){
+        Кнопка &кнопка = итератор_кнопки.second;
+        bool над_кнопкой = область_определения(pos.x,кнопка.позиция.x - (кнопка.размер.x / 2),кнопка.позиция.x +(кнопка.размер.x / 2)) && область_определения(pos.y,кнопка.позиция.y - (кнопка.размер.y / 2),кнопка.позиция.y + (кнопка.размер.y / 2));
+        if(над_кнопкой){
+            if(!кнопка_жать && кнопка.статус != 2){
+                кнопка.статус = 1;
+                ставим_курсор = true;
+                break;
+            }
+        }else{
+            if(кнопка.статус == 1 && !кнопка_жать){
+                кнопка.статус = 0;
+            }
+        }
+    }
+    sf::Cursor курсок;
+    if(ставим_курсор){
+        курсок.loadFromSystem(sf::Cursor::Hand);
+    }else{
+        курсок.loadFromSystem(sf::Cursor::Arrow);
+    }
+    window.setMouseCursor(курсок);
+}
+#ifdef ОТРИСОВЫВАЙ_КНОПКИ 
+ничего рисуй_кнопки(){
+    for(auto &итератор_кнопки : кнопки){
+        Кнопка &кнопка = итератор_кнопки.second;
+        sf::Color цвет;
+        switch(кнопка.статус){
+            case 0:
+            цвет = {255,255,255};
+            break;
+            case 1:
+            цвет = {0,255,0};
+            break;
+            case 2:
+            цвет = {255,0,0};
+            break;
+            default:
+            цвет = {0,0,0};
+        }
+        квадрат_из_линий({кнопка.позиция.x - (кнопка.размер.x / 2),кнопка.позиция.y - (кнопка.размер.y / 2)},кнопка.размер,цвет);
+        пишем_некрасиво(TO_WSTRING(итератор_кнопки.first),{кнопка.позиция.x - (кнопка.размер.x / 2),кнопка.позиция.y - (кнопка.размер.y / 2)-10},0,цвет,16);
+    }
+}
+#endif
+
+ничего сделать_магию(){
+    if(!некрасивый_шрифт.loadFromFile("C:/Windows/Fonts/arial.ttf")){
+        обосратся ошибочка(L"Вот это уже не смешно! Ктото украл некрасивый шрифт.");
+    }
+    sf::Image ico;ico.loadFromFile("./res/icon.png");
+    window.create(sf::VideoMode(1280,720),L"ЕТО КАРТА",sf::Style::Titlebar);
+    window.setIcon(ico.getSize().x,ico.getSize().y,ico.getPixelsPtr());
+}
+ничего начать_cycles(){
+    std::exception_ptr исключение_потока = nullptr;
+    try{
+        загрузить_шрифт();
+        поток = new std::thread([&исключение_потока](){
+            try{
+
+                загрузить_основные_ресы(процент);
+                зе_карта.загрузить();
+                sf::sleep(sf::seconds(1));
+                указатель = меню_указатель;
+                добавить_кнопку("start",{640,360},{500,30});
+                добавить_кнопку("info",{640,400},{500,30});
+                добавить_кнопку("exit",{640,440},{500,30});
+                включить_хит("firefly");
+
+            }catch(const ошибочка &e){
+                исключение_потока = std::current_exception();
+            }
+        });
+        while(window.isOpen()){
+            if(колёсико != 0)колёсико=0;
+            if(кнопка_жать && !sf::Mouse::isButtonPressed(sf::Mouse::Left))кнопка_жать=false;
+            просчёт_кнопок();
+            if(исключение_потока)std::rethrow_exception(исключение_потока);
+            sf::Event event;
+            while(window.pollEvent(event)){
+                ещё_указатель(event);
+                if(event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)просчёт_клика({event.mouseButton.x,event.mouseButton.y});
+                if(event.type==sf::Event::MouseWheelScrolled){
+                    колёсико=event.mouseWheelScroll.delta;
+                }
+            }
+            указатель();
+            #ifdef ОТРИСОВЫВАЙ_КНОПКИ
+            рисуй_кнопки();
+            #endif
+            window.display();
+        }
+        музыка.stop();
+        вопрос();
+    }catch(const ошибочка &e){
+        window.close();
+        высрать(L"Обана! Никогда такого не было и вот опять!\n\nЧё произошло:\n"+e.чё);
+    }
+    if(поток && поток->joinable()){
+        поток->join();
+        delete поток;
+    }
+}
