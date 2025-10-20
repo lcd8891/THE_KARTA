@@ -165,7 +165,9 @@ struct Кнопка{
     sf::Image ico;ico.loadFromFile("./res/icon.png");
     window.create(sf::VideoMode(1280,720),L"ЕТО КАРТА",sf::Style::Titlebar);
     window.setIcon(ico.getSize().x,ico.getSize().y,ico.getPixelsPtr());
-}
+    window.setFramerateLimit(60);
+    window.requestFocus();
+};
 ничего начать_cycles(){
     std::exception_ptr исключение_потока = nullptr;
     try{

@@ -2,7 +2,6 @@
 #include "header.hpp"
 #include "translate.hpp"
 #include <fstream>
-#include <vector>
 
 #define ЧИТАТЬ getline(file,str)
 #define РАЗМЕР 536
@@ -15,7 +14,7 @@ class Карта{
         std::wstring достопремечательность;
         std::wstring описание;
     };
-    std::vector<sf::Vector2f> коорды;
+    std::map<std::string,sf::Vector2f> коорды;
     
     public:
     sf::Texture картинка_1,картинка_2;
@@ -52,12 +51,17 @@ class Карта{
         }
         file.close();
     }
-    ничего получить_ресурсы(std::string id){
-
+    sf::Vector2f загрузить_место(std::string id){
+        sf::Vector2f pos = коорды[id];
+        sf::Vector2f tmp;
+        tmp.x = pos.x - 250;
+        tmp.y = pos.y - 360;
+        return tmp;
     }
     ничего рисовать_пины(){
-        for(const sf::Vector2f &коорд : коорды){
-            спрайт(3,коорд,true);
+        for(auto &итератор : коорды){
+            sf::Vector2f tmp = итератор.second;
+            спрайт(3,tmp,true);
         }
     }
     ничего прогрузить_кнопки(){
@@ -67,7 +71,7 @@ class Карта{
             sf::Vector2f позиция = {372.f+место.позиция.x,55.f+место.позиция.y};
             std::string str;
             добавить_кнопку(итератор.first,позиция,{20,20});
-            коорды.push_back(позиция);
+            коорды[итератор.first] = позиция;
         }
     }
 };
