@@ -12,6 +12,7 @@
 unsigned кадр = 0;
 sf::Vector2f относительная;
 bool ззакрыть = false;
+unsigned текст_по_символу = 0;
 
 ничего открыть_просмотр(){
     window.clear(sf::Color::White);

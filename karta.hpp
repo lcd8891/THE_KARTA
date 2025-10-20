@@ -54,8 +54,8 @@ class Карта{
     sf::Vector2f загрузить_место(std::string id){
         sf::Vector2f pos = коорды[id];
         sf::Vector2f tmp;
-        tmp.x = pos.x - 250;
-        tmp.y = pos.y - 360;
+        tmp.x = 250 - pos.x;
+        tmp.y = 360 - pos.y;
         return tmp;
     }
     ничего рисовать_пины(){
