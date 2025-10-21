@@ -2,7 +2,7 @@
 
 #define ВСЁ_КРУТО 0
 #define TO_WSTRING(STR) std::wstring(STR.begin(),STR.end())
-// #define ОТРИСОВЫВАЙ_КНОПКИ
+#define ОТРИСОВЫВАЙ_КНОПКИ
 #define область_определения(ЗНАЧ,МИН,МАКС) ЗНАЧ >= МИН && ЗНАЧ <= МАКС
 
 #include <SFML/Graphics.hpp>
@@ -17,6 +17,7 @@
 #include "drawing.hpp"
 #include "translate.hpp"
 #include "karta.hpp"
+#include "scene.hpp"
 
 struct Кнопка;
 
@@ -56,6 +57,7 @@ std::map<std::string,Кнопка> кнопки;
 да_нет кнопка_жать = false;
 символ колёсико = 0;
 Карта зе_карта;
+Сцена зе_сцена;
 строка музыки[] = {
     "map",
     "map2"
@@ -74,13 +76,22 @@ struct Кнопка{
     последний_ид++;
     if(последний_ид>9)последний_ид=0;
 }
+ничего включить_хит(){
+    музыка.play();  
+}
 ничего включить_хит(std::string _да){
     if(!музыка.openFromFile("./res/music/"+_да+".mp3")){
         обосратся ошибочка(L"Крутой хит "+TO_WSTRING(_да)+L" небудет :(");
     }
     музыка.setLoop(true);
-    музыка.setVolume(50);
+    музыка.setVolume(25);
     музыка.play();  
+}
+ничего остановить_хит(){
+    музыка.pause();
+}
+ничего выключить_хит(){
+    музыка.stop();
 }
 ничего добавить_кнопку(std::string id,sf::Vector2f _pos,sf::Vector2f _size){
     кнопки[id] = {_pos,_size,0};
@@ -100,6 +111,9 @@ struct Кнопка{
         }
     }
     return строка();
+}
+ничего убрать_кнопку(std::string id){
+    кнопки.erase(id);
 }
 ничего просчёт_клика(sf::Vector2i позиция){
     if(кнопка_жать)return;
@@ -233,6 +247,7 @@ struct Кнопка{
         вопрос();
     }catch(const ошибочка &e){
         window.close();
+        музыка.stop();
         высрать(L"Обана! Никогда такого не было и вот опять!\n\nЧё произошло:\n"+e.чё);
     }
     if(поток && поток->joinable()){

@@ -11,7 +11,8 @@ using символ = char;
 #define обосратся throw
 #define главная main
 #define возврат return
-#define очко nullptr;
+#define очко nullptr
+#define класс class 
 
 данные_какието ошибочка{
     стринги чё;

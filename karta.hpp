@@ -5,6 +5,8 @@
 #include <sstream>
 #include <codecvt>
 #include <vector>
+#include <filesystem>
+#include "scene.hpp"
 
 std::string wstring_to_string(const std::wstring& wstr) {
     std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
@@ -14,9 +16,12 @@ std::string wstring_to_string(const std::wstring& wstr) {
 #define ЧИТАТЬ getline(file,str)
 #define РАЗМЕР 536
 
+void высрать(std::wstring str);
 ничего добавить_кнопку(std::string id,sf::Vector2f _pos,sf::Vector2f _size);
 
-class Карта{
+extern Сцена зе_сцена;
+
+класс Карта{
     private:
     данные_какието Место{
         std::wstring достопремечательность;
@@ -28,9 +33,10 @@ class Карта{
         std::vector<Место> места;
     };
     std::map<std::string,sf::Vector2f> коорды;
-    std::string конкретный_ид;
+    std::string конкретный_ид, путь_сцены;
     std::map<std::string,Город> города;
     
+
     public:
     sf::Texture картинка_1,картинка_2;
     ничего загрузить(){
@@ -99,7 +105,10 @@ class Карта{
         колво = города[id].места.size()-1;
         return tmp;
     }
-    ничего загрузить_место(unsigned id, стринги &_описание, стринги &что){
+    ничего загрузить_сцену_из_места(){
+        зе_сцена.загрузить_сцену(путь_сцены);
+    }
+    ничего загрузить_место(unsigned id, стринги &_описание, стринги &что,да_нет &еть){
         if(!картинка_1.loadFromFile("./res/map/"+конкретный_ид+std::to_string(id)+"-1.png")){
             картинка_1 = текстуры[4];
         }
@@ -108,6 +117,8 @@ class Карта{
         }
         _описание = города[конкретный_ид].места[id].описание;
         что = города[конкретный_ид].места[id].достопремечательность;
+        путь_сцены = конкретный_ид+std::to_string(id);
+        if(std::filesystem::exists("./res/scenes/"+конкретный_ид+std::to_string(id)+".txt")){еть = true;}else{еть=false;}
     }
     ничего рисовать_пины(){
         for(auto &итератор : коорды){
