@@ -20,6 +20,10 @@ template<typename T>
 T min(T a,T b){
     return (a < b) ? a : b;
 }
+template<typename T>
+T max(T a,T b){
+    return (a < b) ? a : b;
+}
 void уведомить(std::wstring str);
 ничего включить_хит(std::string _да);
 ничего включить_звук(unsigned ци);
@@ -56,29 +60,25 @@ std::string wstring_to_string(const std::wstring& wstr);
     sf::Color фон;  
     std::vector<std::function<bool()>> функции;
     std::map<std::string,sf::Sprite> спрайты;
-    unsigned ид_функции{0}, кадры{0};
-    цифорка кадры_функции{0};
+    unsigned ид_функции{0};
     std::vector<std::function<bool()>> одновременно_функции;
     ничего выполнять_задачу(){
         if(одновременно_функции.empty()){
             if(функции[ид_функции]()){
                 ид_функции++;
-                кадры_функции=-1;
             };
         }else{
-            bool некст = true;
+            bool закончили = true;
             auto it = одновременно_функции.begin();
             while(it != одновременно_функции.end()){
-                if(!(*it)()){
-                    некст = false;
-                }else{
+                if((*it)()){
                     it = одновременно_функции.erase(it);
+                }else{
+                    закончили = false;
+                    ++it;
                 }
-                ++it;
             }
-            if(некст){
-                ид_функции++;
-                кадры_функции=-1;
+            if(закончили){
                 одновременно_функции.clear();
             };
         }
@@ -135,8 +135,9 @@ std::string wstring_to_string(const std::wstring& wstr);
                     }
                 }else if(слова[0] == L"ждать"){
                     if(слова.size()==2){
-                        добавить_задачу([a = &кадры_функции,t = (int)(std::stoi(слова[1])/16.6)]() -> bool {
-                            return *a >= t;
+                        добавить_задачу([t = (int)(std::stoi(слова[1])/16.6),кадр = (int)-1]() mutable -> bool {
+                            кадр++;
+                            return кадр >= t;
                         });
                     }else{
                         ошибка_парсинга(L"Кол-во аргументов не cовпадает\nждать <мильсекунды>")
@@ -162,16 +163,17 @@ std::string wstring_to_string(const std::wstring& wstr);
                             pos = смещение,
                             t = (int)(std::stoi(слова[4])/16.6),
                             нач_поз = sf::Vector2f(),
-                            this
+                            this,кадр = (int)-1
                         ]() mutable -> bool {
-                            if(кадры_функции==0){нач_поз = спрайты[id].getPosition();}
-                            float p = (float)(sin(PI2 * (кадры_функции / (float)t)));
+                            кадр++;
+                            if(кадр==0){нач_поз = спрайты[id].getPosition();}
+                            float p = (float)(sin(PI2 * (кадр / (float)t)));
                             sf::Vector2f нов_поз = {
                                 нач_поз.x + pos.x * p,
                                 нач_поз.y + pos.y * p
                             };
                             спрайты[id].setPosition(нов_поз);
-                            return кадры_функции>=t;
+                            return кадр>=t;
                         });
                     }else{
                         ошибка_парсинга(L"Кол-во аргументов не cовпадает\nпередвинуть индендификатор на_X на_Y как_долго")
@@ -197,12 +199,13 @@ std::string wstring_to_string(const std::wstring& wstr);
                 }else if(слова[0] == L"заголовок"){
                     if(слова.size()>1){
                         стринги строкаи = получить_строку(слова,1);
-                        добавить_задачу([a = &кадры_функции,b = строкаи]() -> bool {
-                            float s{(float)sin((*a / 180.f) * PI)};
-                            float m{(float)min<double>(sin((*a / 180.f) * PI),1.f)};
+                        добавить_задачу([b = строкаи,кадр = (int)-1]() mutable -> bool {
+                            кадр++;
+                            float s{(float)sin((кадр / 180.f) * PI)};
+                            float m{(float)min<double>(sin((кадр / 180.f) * PI),1.f)};
                             квадрат({0,360 - 50 * s},{1280,100 * s},{255,255,255,50});
                             пишем(b,{640,354},1,{255,255,255,(unsigned char)(255 * m)},42);
-                            return *a>=180;
+                            return кадр>=180;
                         });
                     }else{
                         ошибка_парсинга(L"Кол-во аргументов не cовпадает\nзаголовок строка...")
@@ -214,6 +217,7 @@ std::string wstring_to_string(const std::wstring& wstr);
                             for(int i = 0;i<b;i++){
                                 одновременно_функции.push_back(функции[ид_функции+i+1]);
                             }
+                            ид_функции+=b;
                             return true;
                         });
                     }else{
@@ -237,13 +241,15 @@ std::string wstring_to_string(const std::wstring& wstr);
                             сас = (unsigned)0,
                             ы = std::wstring(),
                             поз = sf::Vector2f(std::stoi(слова[1]),std::stoi(слова[2])),
+                            кадр = (int)-1,
                             this
                         ]() mutable -> bool {
+                            кадр++;
                             if(стр.length()!=ы.length()){ы+=стр[сас];
                             сас++;
                             включить_звук(1);}
                             пишем(ы,поз);
-                            return стр.length()==ы.length() && кадры_функции>=120+стр.length();
+                            return стр.length()==ы.length() && кадр>=max<int>(стр.length()*5,180);
                         });
                     }else{
                         ошибка_парсинга(L"Кол-во аргументов не cовпадает\nубрать индентификатор")
@@ -257,8 +263,6 @@ std::string wstring_to_string(const std::wstring& wstr);
             ошибка_парсинга(L"Неизвестная ошибка");
         }
         file.close();
-        кадры=0;
-        кадры_функции=0;
         ид_функции=0;
         спрайты.clear();
         одновременно_функции.clear();
@@ -270,8 +274,6 @@ std::string wstring_to_string(const std::wstring& wstr);
         }
         if(ид_функции >= функции.size())return true;
         выполнять_задачу();
-        кадры_функции++;
-        кадры++;
         return false;
     }
 };

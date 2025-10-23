@@ -2,7 +2,7 @@
 
 #define ВСЁ_КРУТО 0
 #define TO_WSTRING(STR) std::wstring(STR.begin(),STR.end())
-#define ОТРИСОВЫВАЙ_КНОПКИ
+// #define ОТРИСОВЫВАЙ_КНОПКИ
 #define область_определения(ЗНАЧ,МИН,МАКС) ЗНАЧ >= МИН && ЗНАЧ <= МАКС
 
 #include <SFML/Graphics.hpp>
