@@ -96,6 +96,14 @@ sf::RectangleShape парралелепипед;
     line[1].color = цвет_по;
     window.draw(line);
 }
+ничего квадрат(sf::Vector2f _позиция,sf::Vector2f _размер,sf::Color _цвет = sf::Color::White){
+    парралелепипед.setFillColor(_цвет);
+    парралелепипед.setOutlineThickness(0);
+    парралелепипед.setOutlineColor({0,0,0,0});
+    парралелепипед.setSize(_размер);
+    парралелепипед.setPosition(_позиция);
+    window.draw(парралелепипед);
+}
 ничего квадрат_из_линий( sf::Vector2f _позиция,sf::Vector2f _размер,sf::Color _цвет = sf::Color::White){
     парралелепипед.setFillColor({0,0,0,0});
     парралелепипед.setOutlineThickness(2);
